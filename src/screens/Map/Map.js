@@ -16,7 +16,7 @@ import { createTrip, deleteTrip, updateTrip } from '../../graphql/mutations'
 
 import Plug from '../../../assets/images/pinFree.png';
 
-const GOOGLE_APIKEY = "AIzaSyChZa94ZxYjZpLhIddiD9i0ygxwTGOyjTE";
+const GOOGLE_APIKEY = "";
 
 const Map = ({ navigation }) => {
 
