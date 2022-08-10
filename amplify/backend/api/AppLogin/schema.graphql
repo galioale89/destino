@@ -1,0 +1,98 @@
+type PluginStation @model @auth(rules: [{allow: private}]) {
+  id: ID!
+  eletrostationID: ID! @index(name: "byEletrostation")
+  plugintypeID: ID! @index(name: "byPluginType")
+  name: String
+  operation: Boolean
+  Schedules: [Schedule] @hasMany(indexName: "byPluginStation", fields: ["id"])
+  Routes: [Route] @hasMany(indexName: "byPluginStation", fields: ["id"])
+  year_instalation: Int
+  brand: String
+  model: String
+  num_chargers: Int
+  max_power: Int
+}
+
+type PluginType @model @auth(rules: [{allow: private}]) {
+  id: ID!
+  name: String!
+  voltage: Int
+  PluginStation: [Vehicle] @hasMany(indexName: "byPluginType", fields: ["id"])
+  current: Int
+  Vehicles: [Vehicle] @hasMany(indexName: "byPluginType", fields: ["id"])
+  image: String
+}
+
+type Schedule @model @auth(rules: [{allow: private}, {allow: owner}]) {
+  id: ID!
+  day: String
+  month: String
+  year: String
+  interval: String
+  period: String
+  pluginstationID: ID! @index(name: "byPluginStation")
+  date: AWSDate
+}
+
+type Eletrostation @model @auth(rules: [{allow: private, operations: [read]}, {allow: public, operations: [read]}, {allow: owner}]) {
+  id: ID!
+  name: String
+  type: String
+  brand: String
+  year: String
+  data: AWSDate
+  latitude: String
+  longitude: String
+  PluginStations: [PluginStation] @hasMany(indexName: "byEletrostation", fields: ["id"])
+  adress: String
+  verified: Boolean
+}
+
+type Route @model @auth(rules: [{allow: private}]) {
+  id: ID!
+  origin: String
+  destination: String
+  tripID: ID @index(name: "byTrip")
+  distance: String
+  date_out: String
+  date_arrive: String
+  time: Int
+  pluginstationID: ID! @index(name: "byPluginStation")
+}
+
+type User @model @auth(rules: [{allow: private}]) {
+  id: ID!
+  adress: String
+  number: Int
+  cep: Int
+  full_name: String
+  phone_number: Int
+  document: String
+  drivers_license: String
+  email: AWSEmail
+}
+
+type Trip @model @auth(rules: [{allow: private}, {allow: owner}]) {
+  id: ID!
+  date: AWSDate
+  hour_out: AWSTime
+  hour_arrive: AWSTime
+  destination: String
+  origin: String
+  Routes: [Route] @hasMany(indexName: "byTrip", fields: ["id"])
+  distance: String
+  vehicleID: ID @index(name: "byVehicle")
+  status: String
+}
+
+type Vehicle @model @auth(rules: [{allow: owner}, {allow: private}]) {
+  id: ID!
+  brand: String
+  model: String
+  year: String
+  license: String
+  Trip: [Trip] @hasMany(indexName: "byVehicle", fields: ["id"])
+  type: String
+  plugintypeID: ID! @index(name: "byPluginType")
+}
+ 

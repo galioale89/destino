@@ -1,0 +1,18 @@
+{
+  "expo": {
+    "name": "DestinoSolar",
+    "slug": "DestinoSolar",
+    "icon": "./assets/images/plugin.png",
+    "version": "1.0.0",
+    "userInterfaceStyle": "dark",
+    "android": {
+      "package": "com.galioale89.DestinoSolar",
+      "versionCode": 1,
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyAzc8kwRAPuNvZp9e7PRG_cS3laCPwuyVU"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "name": "DestinoSolar",
+    "icon": "./assets/images/plugin.png",
+    "slug": "DestinoSolar",
+    "version": "1.0.0",
+    "bundleIdentifier": "com.destinosolar.destinosolar",
+    "buildNumber": "1.0.0",
+    "android": {
+      "package": "destinosolar.com.br"
+    }
+  },
+  "android": {
+    "package": "com.destinosolar.destinosolar",
+    "versionCode": 1
+  }
+}
