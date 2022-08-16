@@ -21,6 +21,7 @@ const GOOGLE_APIKEY = "AIzaSyChZa94ZxYjZpLhIddiD9i0ygxwTGOyjTE";
 
 import Plug from '../../../assets/images/pinFree.png';
 
+// const GOOGLE_APIKEY = "94fef885329d5958970e0b65208e28d0bfcedaa6";
 
 const Map = ({ navigation }) => {
 
