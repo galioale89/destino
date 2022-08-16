@@ -156,8 +156,7 @@ export const AuthProvider = ({ children }) => {
         navigation.dispatch(JumpAction);
     };
 
-    const saveVehicle = (e) => {
-        console.log('e=>'+e)
+    const confirmVehicle = (e) => {
         setVehicle(e);
         setHideModal(true);
     };
@@ -202,7 +201,7 @@ export const AuthProvider = ({ children }) => {
         setReserve(e)
     };
 
-    const saveSearch = (e) => {
+    const saveSearch = async (e) => {
         setSearch(e);
     };
 
@@ -220,7 +219,7 @@ export const AuthProvider = ({ children }) => {
             saveDeparture,
             goToMap,
             savePlaceCharger,
-            saveVehicle,
+            confirmVehicle,
             saveDistance,
             saveTotalDistance,
             saveRoute,

@@ -92,6 +92,7 @@ export default class Route extends React.Component {
                 this.setState({
                     allVehicles: apiVehicle.data.listVehicles.items
                 });
+                this.context.vehicle = apiVehicle.data.listVehicles.items[0];
             }
             this.context.saveSearch(false);
         } catch (error) {
@@ -117,6 +118,7 @@ export default class Route extends React.Component {
             console.log(error);
         }
     };
+    
 
     onDateSelected = data => {
         this.setState({
@@ -233,16 +235,19 @@ export default class Route extends React.Component {
         }
     };
 
-    onSaveVehicle = async () => {
-        let apiData = await API.graphql(graphqlOperation(listVehicles, {
+    onConfirmVehicle = async () => {
+        console.log(this.state.vehicle)
+        const apiData = await API.graphql(graphqlOperation(listVehicles, {
             filter: {
                 id: {
                     eq: this.state.vehicle
                 }
             }
         }))
-        console.log(await apiData.data.listVehicle.items);
-        this.context.saveVehicle(await apiData.data.listVehicle.items);
+        const vehicle = await apiData.data.listVehicles.items;
+        vehicle.map(v=>{
+            this.context.confirmVehicle(v.brand + '/Model ' + v.model + '/Year ' + v.year);
+        })
     };
 
     onNotNowVehicle = () => {
@@ -372,7 +377,7 @@ export default class Route extends React.Component {
                             <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
                                 <Pressable
                                     style={[styles.button, styles.buttonOpen]}
-                                    onPress={this.onSaveVehicle}
+                                    onPress={this.onConfirmVehicle}
                                 >
                                     <Text style={styles.textStyle}>Confirm</Text>
                                 </Pressable>
@@ -401,7 +406,7 @@ export default class Route extends React.Component {
                                     {this.context.vehicle &&
                                         <View style={{ flexDirection: 'row' }}>
                                             <Text style={styles.titleHead}>Vehicle: </Text>
-                                            <Text>{this.context.vehicle}</Text>
+                                            <Text style={styles.titleHead}>{this.context.vehicle}</Text>
                                         </View>
                                     }
                                 </View>
@@ -513,7 +518,7 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
     },
     card: {
-        backgroundColor: '#fff',
+        backgroundColor: '#000',
         justifyContent: 'center',
         marginVertical: 10,
         borderColor: 'rgba(43,51,82,0.2)',
@@ -551,7 +556,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         textAlign: 'center',
         fontWeight: 'bold',
-        color: '#406aac'
+        color: '#fff'
     },
     input: {
         width: '100%',

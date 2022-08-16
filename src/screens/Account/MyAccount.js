@@ -1,19 +1,23 @@
-import React, { useContext, useEffect } from 'react';
-import { StyleSheet, ActivityIndicator, Alert, Text, View } from 'react-native';
+import React, { useContext, useEffect, useState  } from 'react';
+import { StyleSheet, Alert, Text, View } from 'react-native';
 import { useForm } from 'react-hook-form';
 
 import CustomInput from '../../components/CustomInput';
 import CustomButton from '../../components/CustomButton';
 
+import Amplify, {API, graphqlOperation} from 'aws-amplify';
+
 import { listUsers } from '../../graphql/queries';
 
-import { useNavigation } from '@react-navigation/native';
-
 import { AuthContext } from '../../context/auth';
+
+import awsExports from '../../aws-exports';
+Amplify.configure(awsExports);
 
 const Account = ({ navigation }) => {
 
     const { saveSearch } = useContext(AuthContext);
+
     const [account, setAccount] = useState(undefined);
     
     const { control,
@@ -22,10 +26,14 @@ const Account = ({ navigation }) => {
         formState: { errors }
     } = useForm();
 
+    useEffect(()=>{
+        saveSearch(false);
+    },[]);
+    
     useEffect(() => {
-        const account = navigation.addListener('tabPress', (e) => {
+        const accounting = navigation.addListener('tabPress', (e) => {
             saveSearch(false);
-            return account;
+            return accounting;
         })
     }, [navigation]);
 
@@ -36,7 +44,9 @@ const Account = ({ navigation }) => {
     const componentDidMounAccount = async () => {
         try {
             const apiData = await API.graphql(graphqlOperation(listUsers));
+            console.log('apidata=>'+JSON.stringify(apiData.data.items));
             setAccount(apiData.data.listUsers.items);
+            console.log(account);
         } catch (err) {
             console.log('error: ', err);
         }           

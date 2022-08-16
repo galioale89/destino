@@ -60,7 +60,7 @@ type Route @model @auth(rules: [{allow: private}]) {
   pluginstationID: ID! @index(name: "byPluginStation")
 }
 
-type User @model @auth(rules: [{allow: private}]) {
+type User @model @auth(rules: [{allow: private}, {allow: owner}]) {
   id: ID!
   adress: String
   number: Int

@@ -9,14 +9,18 @@ import MapViewDirections from 'react-native-maps-directions';
 
 import { AuthContext } from '../../context/auth';
 
-import { Auth, API, graphqlOperation } from 'aws-amplify';
-
+import Amplify, { Auth, API, graphqlOperation } from 'aws-amplify';
 import { listEletrostations, listPluginStations, listPluginTypes, listTrips } from '../../graphql/queries';
 import { createTrip, deleteTrip, updateTrip } from '../../graphql/mutations'
+import awsExports from '../../aws-exports';
+Amplify.configure(awsExports);
+
+// import {GOOGLE_APIKEY} from 'react-native-dotenv';
+
+const GOOGLE_APIKEY = "AIzaSyChZa94ZxYjZpLhIddiD9i0ygxwTGOyjTE";
 
 import Plug from '../../../assets/images/pinFree.png';
 
-const GOOGLE_APIKEY = "AIzaSyChZa94ZxYjZpLhIddiD9i0ygxwTGOyjTE";
 
 const Map = ({ navigation }) => {
 
@@ -44,6 +48,7 @@ const Map = ({ navigation }) => {
         saveReserve,
         waypoints,
         totalDistance,
+        cancelTrip,
         idTrip } = useContext(AuthContext);
 
     const n = useNavigation();
@@ -89,8 +94,6 @@ const Map = ({ navigation }) => {
                     chargerTypes.push({ id_station: i.id, id_plug: t.id, name_station: i.name, name_plug: t.name })
                 }
             }
-
-            // console.log(chargerTypes)
             eletrostations.push({
                 id: eletrostation.id,
                 name: eletrostation.name,
@@ -101,6 +104,18 @@ const Map = ({ navigation }) => {
             chargerTypes = []
 
         }
+
+        var trips = await API.graphql(graphqlOperation(listTrips, {
+            sort: {
+                direction: 'DESC',
+                field: 'id'
+            }
+        }))
+        var data = trips.data.listTrips.items;
+        data.map(t => {
+            saveIdTrip(t.id)
+        })
+
         setMarkers(eletrostations)
     }
 
@@ -123,20 +138,29 @@ const Map = ({ navigation }) => {
         setIsModalVisible(true);
     }
 
+    const getLastTrip = async () => {
+        var trips = await API.graphql(graphqlOperation(listTrips, {
+            sort: {
+                direction: 'DESC',
+                field: 'id'
+            }
+        }))
+        return trips.data.listTrips.items;
+    }
+
     const saveNewTrip = async (data) => {
         try {
-            let trips = await API.graphql(graphqlOperation(listTrips, {
+            var trips = await API.graphql(graphqlOperation(listTrips, {
                 sort: {
                     direction: 'DESC',
                     field: 'id'
                 }
             }))
-            let newTrip = false
-            let dataTrip = trips.data.listTrips.items
-            if (dataTrip == '') {
+            var data = trips.data.listTrips.items;
+            if (data == '') {
                 newTrip = true;
             } else {
-                if (dataTrip[0].status != 'inserting') {
+                if (data[0].status != 'inserting') {
                     newTrip = true;
                 }
             }
@@ -174,26 +198,33 @@ const Map = ({ navigation }) => {
     }
 
     const handleCancelTrip = async () => {
+
         await API.graphql(graphqlOperation(listTrips, {
             sort: {
                 direction: 'DESC',
                 field: 'id'
             }
         })).then(async trips => {
-            let dataTrip = trips.data.listTrips.items
+            let dataTrip = trips.data.listTrips.items;
             dataTrip.map(async item => {
                 if (item.status == 'inserting') {
-                    let details = {id: item.id, _version: 1};
-                    await API.graphql({
-                        query: deleteTrip,
-                        variables: {
-                            input: details,
-                        }
-                    });
+                    let details = { id: item.id };
+                    try {
+                        await API.graphql({
+                            query: deleteTrip,
+                            variables: {
+                                input: details,
+                            }
+                        });
+                    } catch (error) {
+                        console.log(error);
+                    }
+
                 }
             })
 
             setIsModalVisible(false);
+            cancelTrip();
             saveTrip();
         })
     }
@@ -243,6 +274,19 @@ const Map = ({ navigation }) => {
     //     return calcDistance(lat, lon, result.nativeEvent.coordinate.latitude, result.nativeEvent.coordinate.longitude);
     // }
 
+    const confirmTrip =  async() => {
+        const details = {
+            id: idTrip,
+            status: 'finished'
+        }
+        const dataApi = await API.graphql({
+            query: updateTrip,
+            variables: {
+                input: details
+            }
+        })
+    }
+
     const getMarker = (marker) => {
         setTitle(marker.name);
 
@@ -259,9 +303,17 @@ const Map = ({ navigation }) => {
 
         <View style={styles.container}>
 
+            {makeTrip &&
+                <TouchableOpacity
+                    onPress={confirmTrip}
+                    style={[styles.icon, styles.iconroad]}>
+                    <Icon style={styles.alignIcon} name='road' color='white' size={26} />
+                </TouchableOpacity>
+            }
+
             <TouchableOpacity
                 onPress={signOut}
-                style={styles.icon}>
+                style={[styles.icon, styles.iconexit]}>
                 <Icon style={styles.alignIcon} name='exit-run' color='white' size={26} />
             </TouchableOpacity>
 
@@ -371,7 +423,7 @@ const Map = ({ navigation }) => {
                     <MapViewDirections
                         origin={origin ? origin : location}
                         destination={destinationCharge}
-                        apikey="AIzaSyChZa94ZxYjZpLhIddiD9i0ygxwTGOyjTE"
+                        apikey={GOOGLE_APIKEY}
                         strokeWidth={3}
                         strokeColor='#ffa500'
                         timePrecision='now'
@@ -501,7 +553,6 @@ const styles = StyleSheet.create({
     icon: {
         position: 'absolute',
         flex: 1,
-        bottom: 50,
         zIndex: 1,
         borderRadius: 50,
         height: 50,
@@ -514,8 +565,15 @@ const styles = StyleSheet.create({
         elevation: 5,
         shadowOpacity: 0.25,
         shadowRadius: 10,
-        backgroundColor: '#ffa500',
         right: 20
+    },
+    iconexit:{
+        bottom: 50,
+        backgroundColor: '#ffa500',
+    },
+    iconroad:{
+        top: 80,
+        backgroundColor: 'green',
     },
     alignIcon: {
         alignItems: 'center',

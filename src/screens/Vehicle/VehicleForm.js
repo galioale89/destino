@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext} from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
@@ -73,6 +73,16 @@ const VehicleForm = ({navigation}) => {
         try {
             const apiData = await API.graphql(graphqlOperation(listVehicles));
             setAllVehicle(apiData.data.listVehicles.items);
+            setVehicle(apiData.data.listVehicles.items[0]);
+            const v = apiData.data.listVehicles.items[0];
+            reset({
+                brand: v.brand,
+                model: v.model,
+                type: v.type,
+                plugintypeID: v.plugintypeID,
+                year: v.year,
+                license: v.license
+            });
         } catch (err) {
             console.log('error: ', err);
         }           
@@ -137,7 +147,7 @@ const VehicleForm = ({navigation}) => {
     // };
 
     const onChangeVehicle = (itemValue, itemIndex) => {
-        console.log(itemValue)
+        setVehicle(undefined);
         if (itemValue) {
             reset({
                 brand: itemValue.brand,
@@ -262,13 +272,13 @@ const VehicleForm = ({navigation}) => {
 
             {allVehicles.length > 0 &&
                 <View style={{ width: '100%', marginTop: 20 }}>
-                    <Text style={styles.titleItem}>List Vehicle</Text>
                     <Picker
                         selectedValue={vehicle}
                         style={{ marginBottom: 10 }}
                         onValueChange={onChangeVehicle}
                     >
-                        {allVehicles.map(item =>
+                        <Picker.Item key='0' label="Select A Vehicle" />
+                        {allVehicles.map((item) =>
                             <Picker.Item key={item.id} label={item.brand + '/Model ' + item.model + '/Year ' + item.year} value={item} />
                         )}
                     </Picker>

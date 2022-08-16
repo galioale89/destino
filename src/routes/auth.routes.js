@@ -32,7 +32,7 @@ const AuthRoutes = () => {
                 labeled={false}
                 initialRouteName='Map'
                 activeColor="#ffff"
-                barStyle={{ backgroundColor: '#2b3352' }}
+                barStyle={{ backgroundColor: '#000' }}
             >
                 <Tab.Screen
                     name="Map"
